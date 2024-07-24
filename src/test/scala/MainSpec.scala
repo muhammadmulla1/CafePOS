@@ -1,7 +1,9 @@
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
+
 import Main._
 
-class MainSpec extends AnyWordSpec {
+class MainSpec extends AnyWordSpec with Matchers {
 
   "CafeMenu" should {
     "have a list of items" in {
@@ -48,15 +50,67 @@ class MainSpec extends AnyWordSpec {
         CafeMenu("cake", 1.50, isHot = true, isFood = true, premium = true),
         CafeMenu("espresso", 2.00, isHot = true, isFood = false, premium = true)
       )
-      val totalBill = generateBill(order)
+      val totalBill = Main.calculateTotal(order)
       assert(totalBill == Right(3.50))
     }
 
     "return an error message if the order is empty" in {
       val emptyOrder = List.empty[CafeMenu]
-      val totalBill = generateBill(emptyOrder)
+      val totalBill = calculateTotal(emptyOrder)
       assert(totalBill == Left("The order is empty."))
     }
   }
 
+  "calculateServiceCharge" should {
+    "apply no service charge if all items are cold drinks" in {
+      val order = List(
+        CafeMenu("iced coffee", 2.50, isHot = false, isFood = false, premium = false),
+        CafeMenu("smoothie", 3.50, isHot = false, isFood = false, premium = false)
+      )
+      calculateServiceCharge(order) shouldEqual 0.0
+    }
+
+    "apply a 10% service charge for hot drinks or cold food" in {
+      val order = List(
+        CafeMenu("tea", 1.25, isHot = true, isFood = false, premium = false),
+        CafeMenu("muffin", 1.75, isHot = false, isFood = true, premium = false)
+      )
+      calculateServiceCharge(order) shouldEqual 0.10 * 3.00
+    }
+
+    "apply a 20% service charge for hot food with a maximum of £20" in {
+      val order = List(
+        CafeMenu("cake", 1.50, isHot = true, isFood = true, premium = false),
+        CafeMenu("sandwich", 3.50, isHot = false, isFood = true, premium = false)
+      )
+      calculateServiceCharge(order) shouldEqual math.min(0.20 * 5.00, 20.0)
+    }
+
+    "apply a 25% service charge for premium specials with a maximum of £40" in {
+      val order = List(
+        CafeMenu("premium tea", 2.50, isHot = true, isFood = false, premium = true)
+      )
+      calculateServiceCharge(order) shouldEqual math.min(0.25 * 2.50, 40.0)
+    }
+
+    "apply the correct service charge if items purchased are mixed" in {
+      val order = List(
+        CafeMenu("premium coffee", 1.50, isHot = true, isFood = false, premium = true),
+        CafeMenu("muffin", 1.75, isHot = false, isFood = true, premium = true)
+      )
+      calculateServiceCharge(order) shouldEqual math.min(0.25 * 4.75, 40.0)
+    }
+  }
+
+  "calculateFinalCharge" should {
+    "return the total amount including a service charge" in {
+      val order = List(
+        CafeMenu("cake", 1.50, isHot = true, isFood = true, premium = false),
+        CafeMenu("espresso", 2.00, isHot = true, isFood = false, premium = false)
+      )
+      val total = order.map(_.price).sum
+      val serviceCharge = calculateServiceCharge(order)
+      calculateFinalCharge(order) shouldEqual total + serviceCharge
+    }
+  }
 }

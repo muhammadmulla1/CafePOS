@@ -1,3 +1,5 @@
+import scala.util.Random
+
 object Main {
 
   case class CafeMenu(name: String, price: Double, isHot: Boolean, isFood: Boolean, premium: Boolean)
@@ -23,15 +25,16 @@ object Main {
   def removePremiumSpecial(specialItem: CafeMenu, menu: List[CafeMenu]): List[CafeMenu] = {
     menu.filterNot(_ == specialItem)
   }
-//
-//
-//  def calculateBill(order:List[String], menu: List[CafeMenu]):String = {
-//    val items = order.map(itemName => menu.find(_.name = itemName)
-//  }
-//
-//  def createRandomOrder(menu: List[CafeMenu], numberOfItems: Int): List[CafeMenu] = {
-//    Random.shuffle(menu).take(numberOfItems)
-//  }
+
+  def createRandomOrder(menu: List[CafeMenu], numberOfItems: Int): List[CafeMenu] = {
+    Random.shuffle(menu).take(numberOfItems)
+  }
+
+  def generateBill(order: List[CafeMenu]): Either[String, Double] = {
+    if (order.isEmpty) Left("The order is empty.")
+    else Right(order.map(_.price).sum)
+  }
+
 
 
 }

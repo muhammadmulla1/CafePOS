@@ -28,6 +28,10 @@ object Main {
 //  def calculateBill(order:List[String], menu: List[CafeMenu]):String = {
 //    val items = order.map(itemName => menu.find(_.name = itemName)
 //  }
+//
+//  def createRandomOrder(menu: List[CafeMenu], numberOfItems: Int): List[CafeMenu] = {
+//    Random.shuffle(menu).take(numberOfItems)
+//  }
 
 
 }

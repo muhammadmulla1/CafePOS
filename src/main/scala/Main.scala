@@ -31,6 +31,8 @@ object Main {
   }
 
   def generateBill(order: List[CafeMenu]): Either[String, Double] = {
+
+
     if (order.isEmpty) Left("The order is empty.")
     else Right(order.map(_.price).sum)
   }

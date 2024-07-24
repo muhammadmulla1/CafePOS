@@ -1,4 +1,4 @@
-[warn] scala-library-2.13.14-sources.jar no longer exists at /Users/bilal.amiry/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.14/scala-library-2.13.14-sources.jar
+[warn] scala-library-2.13.14-sources.jar no longer exists at /Users/muhammad.mulla/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.14/scala-library-2.13.14-sources.jar
 [debug] not up to date. inChanged = false, force = false
-[debug] Updating ProjectRef(uri("file:/Users/muhammad.mulla/Documents/CafePOS/"), "root")...
-[debug] Done updating ProjectRef(uri("file:/Users/muhammad.mulla/Documents/CafePOS/"), "root")
+[debug] Updating ProjectRef(uri("file:/Users/arei.mohammed/Documents/Mercator/Training/CafePOS/"), "root")...
+[debug] Done updating ProjectRef(uri("file:/Users/arei.mohammed/Documents/Mercator/Training/CafePOS/"), "root")

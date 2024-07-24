@@ -13,7 +13,7 @@ def reverseTree(tree: Tree): Tree = tree match {
 // Helper function to print the tree (in-order traversal)
 def printTree(tree: Tree): Unit = tree match {
   case Empty =>
-  case Node(value, left, right) =>efwwefe
+  case Node(value, left, right) =>
     printTree(left)
     print(s"$value ")
     printTree(right)

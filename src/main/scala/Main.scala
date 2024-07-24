@@ -7,9 +7,16 @@ object Main extends App {
   )
 
   def addPremiumSpecial(specialItem: CafeMenu, menu: List[CafeMenu]): List[CafeMenu] = {
-    menu :+ specialItem
+    menu :+ specialItem.copy(premium = true)
   }
 
-  val newItem = CafeMenu("premium coffee", 3.00, isHot = true, isFood = false, premium = true)
+  def removeItem(itemName: String, menu: List[CafeMenu]): List[CafeMenu] = {
+    menu.filterNot(_.name.equalsIgnoreCase(itemName))
+  }
+
+  val newItem = CafeMenu("premium coffee", 3.00, isHot = true, isFood = false, premium = false)
   val updatedMenu = addPremiumSpecial(newItem, list)
+  val menuAfterRemoval = removeItem("cake", updatedMenu)
+
+
 }

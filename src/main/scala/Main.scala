@@ -4,7 +4,7 @@ object Main extends App {
 
   case class CafeMenu(name: String, price: Double, isHot: Boolean, isFood: Boolean, premium: Boolean)
 
-  val list: List[CafeMenu] = List(
+  val menu: List[CafeMenu] = List(
     CafeMenu("cake", 1.50, isHot = true, isFood = true, premium = true),
     CafeMenu("espresso", 2.00, isHot = true, isFood = false, premium = true),
     CafeMenu("sandwich", 9.50, isHot = false, isFood = true, premium = false),
@@ -16,6 +16,7 @@ object Main extends App {
     CafeMenu("hot chocolate", 2.75, isHot = true, isFood = false, premium = true),
     CafeMenu("smoothie", 3.50, isHot = false, isFood = false, premium = false)
   )
+
 
   def addPremiumSpecial(specialItem: CafeMenu, menu: List[CafeMenu]): List[CafeMenu] = {
     menu :+ specialItem
@@ -47,24 +48,14 @@ object Main extends App {
     order.map(_.price).sum
   }
 
-  def calculateFinalCharge(order: List[CafeMenu],customServiceCharge: Option[Double]=None,additionalCharge:Boolean = false): Double = {
+  def calculateFinalCharge(order: List[CafeMenu], customServiceCharge: Option[Double] = None, additionalCharge: Boolean = false): Double = {
     val total = calculateTotal(order)
     val serviceCharge = calculateServiceCharge(order)
     val finalServiceCharge = customServiceCharge match {
-      case Some(charge) => charge
       case Some(charge) if additionalCharge => serviceCharge + charge
+      case Some(charge) => charge
       case None => serviceCharge
     }
     total + finalServiceCharge
   }
-  val randomOrder = createRandomOrder(list, 10)
-  println(s"Random Order: $randomOrder")
-  val serviceCharge = calculateServiceCharge(randomOrder)
-  val customCharge = 5.00
-  println(s"Service Charge: $serviceCharge")
-  println(s"Final Charge with default service charge: ${calculateFinalCharge(randomOrder)}")
-  println(s"Final Charge with custom service charge instead: ${calculateFinalCharge(randomOrder, Some(customCharge))}")
-  println(s"Final Charge with custom service charge in addition: ${calculateFinalCharge(randomOrder, Some(customCharge), additionalCharge = true)}")
-
-
 }

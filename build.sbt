@@ -12,3 +12,6 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.2.19" % Test,
   "org.scalactic" %% "scalactic" % "3.2.19",
 )
+
+
+libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.2"

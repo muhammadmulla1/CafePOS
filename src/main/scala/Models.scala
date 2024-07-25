@@ -22,4 +22,23 @@ object Models {
                        temperature: Temperature.Temperature,
                        premium: Boolean)
 
+  object Category extends Enumeration {
+    type Category = Value
+    val Food, Drink = Value
+  }
+
+  object Temperature extends Enumeration {
+    type Temperature = Value
+    val Hot, Cold = Value
+  }
+
+  object LoyaltyCardType extends Enumeration {
+    type LoyaltyCardType = Value
+    val Drinks, Discount = Value
+  }
+
+  object Currency extends Enumeration {
+    type Currency = Value
+    val GBP, EUR, USD, YEN = Value
+  }
 }

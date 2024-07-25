@@ -8,6 +8,8 @@ object Main {
   import Currency._
   import Models._
 
+
+  // List with the cafe menu items
   val menu: List[CafeMenu] = List(
     CafeMenu("cake", 1.50, Category.Food, Temperature.Cold, premium = true),
     CafeMenu("espresso", 2.00, Category.Drink, Temperature.Hot, premium = true),
@@ -20,37 +22,39 @@ object Main {
     CafeMenu("hot chocolate", 2.75, Category.Drink, Temperature.Hot, premium = true),
     CafeMenu("smoothie", 3.50, Category.Drink, Temperature.Cold, premium = false)
   )
-
+  // exchange rate map
   val currencyExchange: Map[Currency.Value, Double] = Map(
     Currency.GBP -> 1.0,
     Currency.EUR -> 1.19,
     Currency.USD -> 1.29,
-    Currency.YEN -> 1.9765
+    Currency.YEN -> 1.976
   )
 
+
+  // Convert the price of an item GBP -> new currency
   def convertCurrency(price: Double, currency: Currency.Value): Double = {
     price * currencyExchange(currency)
   }
-
+  // apply the currency conversion to a total bill
   def applyCurrencyConversion(totalBill: Double, currency: Currency.Value): Double = {
     convertCurrency(totalBill, currency)
   }
-
+  // add a premium item to the menu
   def addPremiumSpecial(specialItem: CafeMenu, menu: List[CafeMenu]): List[CafeMenu] = {
     menu :+ specialItem
   }
 
-  // Remove premium special
+  // Remove premium special from the menu
   def removePremiumSpecial(specialItem: CafeMenu, menu: List[CafeMenu]): List[CafeMenu] = {
     menu.filterNot(_ == specialItem)
   }
 
-  // Create a random order
+  // Create a random order of a specified number of items
   def createRandomOrder(menu: List[CafeMenu], numberOfItems: Int): List[CafeMenu] = {
     Random.shuffle(menu).take(numberOfItems)
   }
 
-  // Calculate service charge
+  // Calculate service charge for an order
   def calculateServiceCharge(order: List[CafeMenu]): Double = {
     val total = order.map(_.price).sum
     val hasHotDrinks = order.exists(item => item.temperature == Temperature.Hot && item.category == Category.Drink)
@@ -70,7 +74,7 @@ object Main {
     order.map(_.price).sum
   }
 
-  // Calculate final charge
+  // Calculate final charge, includes service charge and optional custom charges
   def calculateFinalCharge(order: List[CafeMenu], customServiceCharge: Option[Double] = None, additionalCharge: Boolean = false): Double = {
     val total = calculateTotal(order)
     val serviceCharge = calculateServiceCharge(order)
@@ -81,7 +85,7 @@ object Main {
     }
     total + finalServiceCharge
   }
-
+  // check if cusotmer is eligabel for loyalty card
   def checkLoyaltyCardEligibility(customer: Customer, loyaltyCard: String): Boolean = {
     val totalPurchaseHistory = customer.purchaseHistory.map(_.price).sum
     loyaltyCard.toLowerCase match {
@@ -100,6 +104,7 @@ object Main {
     }
   }
 
+  // update customers drinks loyalty card
   def updateDrinksLoyaltyCard(customer: Customer): Customer = {
     customer.drinksLoyaltyCard match {
       case Some(card) if card.stamps < 9 =>
@@ -113,7 +118,7 @@ object Main {
       case None => customer
     }
   }
-
+  // update customers discount loyalty card (stars)
   def updateDiscountLoyaltyCard(customer: Customer, orderTotal: Double): Customer = {
     if (orderTotal > 20) {
       customer.discountLoyaltyCard match {
@@ -140,18 +145,22 @@ object Main {
       case None => orderTotal // No discount card
     }
   }
-
-  def eligibleForDiscount(staff: Staff): Boolean = {
-    staff.monthsWorked >= 6
-  }
-
-  def applyStaffDiscount(staff: Staff, totalBill: Double): Double = {
-    if (eligibleForDiscount(staff)) {
-      totalBill * 0.90
-    } else {
-      totalBill
+  // apply staff discount to total bill
+  def eligibleForDiscount(staff: Staff): Either[String,Boolean]={
+    staff match {
+      case Staff  (_,age,_,_,_,monthsWorked) if monthsWorked >= 6 && age >=18 => Right(true)
+      case Staff (_,age,_,_,_,monthsWorked) if monthsWorked >age => Left("Illegal: Months worked is higher than the age")
+      case _ => Right(false)
     }
   }
+
+  def applyStaffDiscount(staff: Staff, totalBill: Double): Either[String,Double] = {
+    eligibleForDiscount(staff) match {
+      case Right(true) => Right(totalBill*0.9)
+      case Right(false) => Right(totalBill)
+      case Left(error) => Left(error)
+    }
+    }
 
 }
 

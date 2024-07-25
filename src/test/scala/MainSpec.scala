@@ -226,21 +226,21 @@ class MainSpec extends AnyWordSpec with Matchers {
       val totalBill = 33.0
       val staff = Staff("Arei Smith", 25, List(), None, None, monthsWorked = 8)
       val discountedBill = applyStaffDiscount(staff, totalBill)
-      discountedBill shouldBe 29.7
+      discountedBill shouldBe Right(29.7)
     }
 
     "not apply the discount if the staff member has worked for less than 6 months" in {
       val totalBill = 33.0
       val staff = Staff("John Doe", 30, List(), None, None, monthsWorked = 5)
       val discountedBill = applyStaffDiscount(staff, totalBill)
-      discountedBill shouldBe 33.0 // No discount applied
+      discountedBill shouldBe Right(33.0) // No discount applied
     }
 
     "not apply the discount if the person is not a staff member" in {
       val totalBill = 33.0
       val staff = Staff("Jane Doe", 30, List(), None, None, monthsWorked = 0)
       val discountedBill = applyStaffDiscount(staff, totalBill)
-      discountedBill shouldBe 33.0 // No discount applied
+      discountedBill shouldBe Right(33.0) // No discount applied
     }
   }
 

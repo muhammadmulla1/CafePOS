@@ -7,12 +7,16 @@ object Main {
   import Category._
   import Temperature._
   import LoyaltyCardType._
+  import Currency._
 
   case class Customer(name: String,
                       age: Int,
                       purchaseHistory: List[CafeMenu],
                       drinksLoyaltyCard: Option[DrinksLoyaltyCard],
-                      discountLoyaltyCard: Option[DiscountLoyaltyCard]
+                      discountLoyaltyCard: Option[DiscountLoyaltyCard],
+                      monthsWorked: Option[Int] = None,
+                      isEmployee: Boolean
+
                      )
 
   case class DrinksLoyaltyCard(stamps: Int = 0)
@@ -26,6 +30,9 @@ object Main {
                        temperature: Temperature.Temperature,
                        premium: Boolean
                      )
+
+
+
 
   // Sample menu items
   val menu: List[CafeMenu] = List(
@@ -41,7 +48,21 @@ object Main {
     CafeMenu("smoothie", 3.50, Category.Drink, Temperature.Cold, premium = false)
   )
 
-  // Add premium special
+  val currencyExchange: Map[Currency.Value, Double] = Map(
+    Currency.GBP -> 1.0,
+    Currency.EUR -> 1.19,
+    Currency.USD -> 1.29,
+    Currency.YEN -> 1.9765
+  )
+
+  def convertCurrency(price: Double, currency: Currency.Value): Double = {
+    price * currencyExchange(currency)
+  }
+
+  def applyCurrencyConversion(totalBill: Double, currency: Currency.Value): Double = {
+    convertCurrency(totalBill, currency)
+  }
+
   def addPremiumSpecial(specialItem: CafeMenu, menu: List[CafeMenu]): List[CafeMenu] = {
     menu :+ specialItem
   }
@@ -120,7 +141,6 @@ object Main {
     }
   }
 
-
   def updateDiscountLoyaltyCard(customer: Customer, orderTotal: Double): Customer = {
     if (orderTotal > 20) {
       customer.discountLoyaltyCard match {
@@ -147,5 +167,20 @@ object Main {
       case None => orderTotal // No discount card
     }
   }
+
+  def eligibleForDiscount(customer: Customer): Boolean = {
+    customer.monthsWorked match {
+      case Some(months) if months >= 6 => true
+      case _ => false
+    }
+  }
+  def applyStaffDiscount(customer: Customer, totalBill: Double): Double = {
+    if (eligibleForDiscount(customer)) {
+      totalBill * 0.90
+    } else {
+      totalBill
+    }
+  }
+
 }
 

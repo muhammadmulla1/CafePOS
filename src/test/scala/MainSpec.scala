@@ -120,6 +120,7 @@ class MainSpec extends AnyWordSpec with Matchers {
 
   "checkLoyaltyCardEligibility" should {
     "return true for a customer eligible for a drinks loyalty card" in {
+      val customer = Customer("Arei Mohammed", 25, List.fill(5)(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), None, None)
     }
   }
 
@@ -146,5 +147,51 @@ class MainSpec extends AnyWordSpec with Matchers {
 
   "return false for a customer not eligible for a discount loyalty card due to having a drinks loyalty card" in {
 
+  }
+
+  "applyStamp" should {
+    "add a stamp to a customer's drinks loyalty card" in {
+
+    }
+
+    "resets the stamps t0 0 after the 10th stamp" in {
+
+    }
+
+    "do nothing if the customer does not have a drinks loyalty card" in {
+
+    }
+  }
+
+  "applyStar" should {
+    "add a star to the customer's discount loyalty card if the bill is more than £20" in {
+
+    }
+
+    "not add a star to a customer's discount loyalty card if the bill is £20 or less" in {
+
+    }
+
+    "not add more stars if the customer already has 8 stars" in {
+
+    }
+
+    "do nothing if the customer does not have discount loyalty card" in {
+
+    }
+  }
+
+  "calculateDiscount" should {
+    "apply the correct discount based on the number of stars" in {
+
+    }
+
+    "apply the maximum discount of 16% if the customer has 8 stars" in {
+
+    }
+
+    "apply no discount if the customer does not have  discount loyalty card" in {
+
+    }
   }
 }

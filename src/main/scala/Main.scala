@@ -1,24 +1,31 @@
+import sun.util.calendar.BaseCalendar.Date
+
 import scala.util.Random
 
-object Main  {
+object Main {
 
-  object Category extends Enumeration {
-    type Category = Value
-    val Food, Drink = Value
-  }
+  import Category._
+  import Temperature._
+  import LoyaltyCardType._
 
-  object Temperature extends Enumeration {
-    type Temperature = Value
-    val Hot, Cold = Value
-  }
+  case class Customer(name: String,
+                      age: Int,
+                      purchaseHistory: List[CafeMenu],
+                      drinksLoyaltyCard: Option[DrinksLoyaltyCard],
+                      discountLoyaltyCard: Option[DiscountLoyaltyCard]
+                     )
+
+  case class DrinksLoyaltyCard(stamps: Int = 0)
+
+  case class DiscountLoyaltyCard(stars: Int = 0)
 
   case class CafeMenu(
-                           name: String,
-                           price: Double,
-                           category: Category.Category,
-                           temperature: Temperature.Temperature,
-                           premium: Boolean
-                         )
+                       name: String,
+                       price: Double,
+                       category: Category.Category,
+                       temperature: Temperature.Temperature,
+                       premium: Boolean
+                     )
 
   // Sample menu items
   val menu: List[CafeMenu] = List(
@@ -79,6 +86,57 @@ object Main  {
       case None => serviceCharge
     }
     total + finalServiceCharge
+  }
+
+  def checkLoyaltyCardEligibility(customer: Customer, loyaltyCard: String): Boolean = {
+    val totalPurchaseHistory = customer.purchaseHistory.map(_.price).sum
+    loyaltyCard.toLowerCase match {
+      case "drinks" => customer.age >= 18 &&
+        customer.purchaseHistory.count(_.category == Category.Drink) >= 5 &&
+        customer.drinksLoyaltyCard.isEmpty
+      case "discount" => customer.age >= 18 &&
+        customer.purchaseHistory.size >= 5 &&
+        customer.purchaseHistory.size >= 150 &&
+        customer.discountLoyaltyCard.isEmpty
+      case _ => false
+    }
+  }
+
+  def updateDrinksLoyaltyCard(customer: Customer): Customer = {
+    customer.drinksLoyaltyCard match {
+      case Some(card) if card.stamps < 10 =>
+        val newStamps = card.stamps + 1
+        val updatedCard = card.copy(stamps = newStamps)
+        customer.copy(drinksLoyaltyCard = Some(updatedCard))
+      case _ => customer // Either no card or already full
+    }
+  }
+
+  def updateDiscountLoyaltyCard(customer: Customer, orderTotal: Double): Customer = {
+    if (orderTotal > 20) {
+      customer.discountLoyaltyCard match {
+        case Some(card) if card.stars < 8 =>
+          val newStars = card.stars + 1
+          val updatedCard = card.copy(stars = newStars)
+          customer.copy(discountLoyaltyCard = Some(updatedCard))
+        case Some(card) =>
+          customer // Already has maximum stars
+        case None =>
+          customer // No discount card
+      }
+    } else {
+      customer // Order doesn't qualify for a star
+    }
+  }
+
+  def applyDiscount(customer: Customer, orderTotal: Double): Double = {
+    customer.discountLoyaltyCard match {
+      case Some(card) =>
+        val discountPercentage = card.stars * 0.02
+        val discount = orderTotal * discountPercentage
+        orderTotal - discount
+      case None => orderTotal // No discount card
+    }
   }
 }
 

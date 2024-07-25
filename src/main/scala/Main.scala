@@ -91,13 +91,17 @@ object Main {
   def checkLoyaltyCardEligibility(customer: Customer, loyaltyCard: String): Boolean = {
     val totalPurchaseHistory = customer.purchaseHistory.map(_.price).sum
     loyaltyCard.toLowerCase match {
-      case "drinks" => customer.age >= 18 &&
+      case "drinks" =>
+        customer.age >= 18 &&
         customer.purchaseHistory.count(_.category == Category.Drink) >= 5 &&
         customer.drinksLoyaltyCard.isEmpty
-      case "discount" => customer.age >= 18 &&
+
+      case "discount" =>
+        customer.age >= 18 &&
         customer.purchaseHistory.size >= 5 &&
-        customer.purchaseHistory.size >= 150 &&
+        totalPurchaseHistory >= 150 &&
         customer.discountLoyaltyCard.isEmpty
+
       case _ => false
     }
   }
@@ -106,9 +110,9 @@ object Main {
     customer.drinksLoyaltyCard match {
       case Some(card) if card.stamps < 9 =>
         val newStamps = card.stamps +1
-        val updatedCard = card.copy(stamps = card.stamps)
+        val updatedCard = card.copy(stamps = newStamps)
         customer.copy(drinksLoyaltyCard = Some(updatedCard))
-      case Some(card) if card.stamps == 9 =>
+      case Some(card) if card.stamps == 10 =>
         val updatedCard = card.copy(stamps = 0)
         customer.copy(drinksLoyaltyCard = Some(updatedCard))
       case Some(card) => customer

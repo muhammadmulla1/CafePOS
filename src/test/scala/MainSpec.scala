@@ -145,7 +145,7 @@ class MainSpec extends AnyWordSpec with Matchers {
 
 
   "return true for a customer eligible for a discount loyalty card" in {
-    val customer = Customer("John Smith", 30, List.fill(5)(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard()))
+    val customer = Customer("John Smith", 30, List.fill(5)(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, None)
     checkLoyaltyCardEligibility(customer, "discount") shouldBe true
   }
 
@@ -155,7 +155,7 @@ class MainSpec extends AnyWordSpec with Matchers {
   }
 
   "return false for a customer not eligible for a discount loyalty card due to having a drinks loyalty card" in {
-    val customer = Customer("John Smith", 30, List.fill(5)(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), Some(DrinksLoyaltyCard()), None)
+    val customer = Customer("John Smith", 30, List.fill(3)(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), Some(DrinksLoyaltyCard()), None)
     checkLoyaltyCardEligibility(customer, "discount") shouldBe false
   }
 
@@ -167,7 +167,7 @@ class MainSpec extends AnyWordSpec with Matchers {
     }
 
     "resets the stamps to 0 after the 10th stamp" in {
-      val customer = Customer("Arei Mohammed", 30, List(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), Some(DrinksLoyaltyCard(0)), None)
+      val customer = Customer("Arei Mohammed", 30, List(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), Some(DrinksLoyaltyCard(10)), None)
       val updatedCustomer = updateDrinksLoyaltyCard(customer)
       updatedCustomer.drinksLoyaltyCard.get.stamps shouldBe 0
     }

@@ -226,7 +226,6 @@ class MainSpec extends AnyWordSpec with Matchers {
       val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, None)
       val orderTotal = 100.0
       applyDiscount(customer, orderTotal) shouldBe orderTotal
-
     }
   }
 }

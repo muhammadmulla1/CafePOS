@@ -117,4 +117,34 @@ class MainSpec extends AnyWordSpec with Matchers {
       calculateFinalCharge(order) shouldBe total + serviceCharge
     }
   }
+
+  "checkLoyaltyCardEligibility" should {
+    "return true for a customer eligible for a drinks loyalty card" in {
+    }
+  }
+
+  "return false for a customer not eligible for a drinks loyalty card due to age" in {
+
+  }
+
+  "return false for a customer not eligible for a drinks loyalty card due to insufficient purchases" in {
+
+  }
+
+  "return false for a customer not eligible for a drinks loyalty card due to having a discount loyalty card" in {
+
+  }
+
+
+  "return true for a customer eligible for a discount loyalty card" in {
+
+  }
+
+  "return false for a customer not eligible for a discount loyalty card due to insufficient total spend" in {
+
+  }
+
+  "return false for a customer not eligible for a discount loyalty card due to having a drinks loyalty card" in {
+
+  }
 }

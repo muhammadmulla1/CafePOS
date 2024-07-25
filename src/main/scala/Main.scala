@@ -80,15 +80,5 @@ object Main  {
     }
     total + finalServiceCharge
   }
-
-  val randomOrder = createRandomOrder(menu, 10)
-  val serviceCharge = calculateServiceCharge(randomOrder)
-  val customCharge = 5.00
-
-  println(s"Service Charge: $serviceCharge")
-  println(s"Final Charge with default service charge: ${calculateFinalCharge(randomOrder)}")
-  println(s"Final Charge with custom service charge instead: ${calculateFinalCharge(randomOrder, Some(customCharge))}")
-  println(s"Final Charge with custom service charge in addition: ${calculateFinalCharge(randomOrder, Some(customCharge), additionalCharge = true)}")
-
 }
 

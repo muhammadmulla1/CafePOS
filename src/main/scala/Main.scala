@@ -1,39 +1,60 @@
 import scala.util.Random
 
-object Main extends App {
+object Main  {
 
-  case class CafeMenu(name: String, price: Double, isHot: Boolean, isFood: Boolean, premium: Boolean)
+  object Category extends Enumeration {
+    type Category = Value
+    val Food, Drink = Value
+  }
 
-  val list: List[CafeMenu] = List(
-    CafeMenu("cake", 1.50, isHot = true, isFood = true, premium = true),
-    CafeMenu("espresso", 2.00, isHot = true, isFood = false, premium = true),
-    CafeMenu("sandwich", 9.50, isHot = false, isFood = true, premium = false),
-    CafeMenu("iced coffee", 4.50, isHot = false, isFood = false, premium = true),
-    CafeMenu("muffin", 1.75, isHot = false, isFood = true, premium = false),
-    CafeMenu("tea", 1.25, isHot = true, isFood = false, premium = false),
-    CafeMenu("latte", 3.00, isHot = true, isFood = false, premium = true),
-    CafeMenu("bagel", 2.00, isHot = false, isFood = true, premium = false),
-    CafeMenu("hot chocolate", 2.75, isHot = true, isFood = false, premium = true),
-    CafeMenu("smoothie", 3.50, isHot = false, isFood = false, premium = false)
+  object Temperature extends Enumeration {
+    type Temperature = Value
+    val Hot, Cold = Value
+  }
+
+  case class CafeMenu(
+                           name: String,
+                           price: Double,
+                           category: Category.Category,
+                           temperature: Temperature.Temperature,
+                           premium: Boolean
+                         )
+
+  // Sample menu items
+  val menu: List[CafeMenu] = List(
+    CafeMenu("cake", 1.50, Category.Food, Temperature.Cold, premium = true),
+    CafeMenu("espresso", 2.00, Category.Drink, Temperature.Hot, premium = true),
+    CafeMenu("sandwich", 3.50, Category.Food, Temperature.Cold, premium = false),
+    CafeMenu("iced coffee", 2.50, Category.Drink, Temperature.Cold, premium = true),
+    CafeMenu("muffin", 1.75, Category.Food, Temperature.Cold, premium = false),
+    CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false),
+    CafeMenu("latte", 3.00, Category.Drink, Temperature.Hot, premium = true),
+    CafeMenu("bagel", 2.00, Category.Food, Temperature.Cold, premium = false),
+    CafeMenu("hot chocolate", 2.75, Category.Drink, Temperature.Hot, premium = true),
+    CafeMenu("smoothie", 3.50, Category.Drink, Temperature.Cold, premium = false)
   )
 
+  // Add premium special
   def addPremiumSpecial(specialItem: CafeMenu, menu: List[CafeMenu]): List[CafeMenu] = {
     menu :+ specialItem
   }
 
+  // Remove premium special
   def removePremiumSpecial(specialItem: CafeMenu, menu: List[CafeMenu]): List[CafeMenu] = {
     menu.filterNot(_ == specialItem)
   }
 
+  // Create a random order
   def createRandomOrder(menu: List[CafeMenu], numberOfItems: Int): List[CafeMenu] = {
     Random.shuffle(menu).take(numberOfItems)
   }
 
+  // Calculate service charge
   def calculateServiceCharge(order: List[CafeMenu]): Double = {
     val total = order.map(_.price).sum
-    val hasHotDrinks = order.exists(item => item.isHot && !item.isFood)
-    val hasColdFood = order.exists(item => !item.isHot && item.isFood)
-    val hasHotFood = order.exists(item => item.isHot && item.isFood)
+    val hasHotDrinks = order.exists(item => item.temperature == Temperature.Hot && item.category == Category.Drink)
+    val hasColdFood = order.exists(item => item.temperature == Temperature.Cold && item.category == Category.Food)
+    val hasHotFood = order.exists(item => item.temperature == Temperature.Hot && item.category == Category.Food)
     val hasPremiumSpecial = order.exists(_.premium)
 
     val hotFoodCharge = if (hasHotFood) math.min(total * 0.20, 20.0) else 0.0
@@ -43,28 +64,31 @@ object Main extends App {
     math.max(hotFoodCharge, math.max(premiumSpecialCharge, otherCharge))
   }
 
+  // Calculate total bill
   def calculateTotal(order: List[CafeMenu]): Double = {
     order.map(_.price).sum
   }
 
-  def calculateFinalCharge(order: List[CafeMenu],customServiceCharge: Option[Double]=None,additionalCharge:Boolean = false): Double = {
+  // Calculate final charge
+  def calculateFinalCharge(order: List[CafeMenu], customServiceCharge: Option[Double] = None, additionalCharge: Boolean = false): Double = {
     val total = calculateTotal(order)
     val serviceCharge = calculateServiceCharge(order)
     val finalServiceCharge = customServiceCharge match {
-      case Some(charge) => charge
       case Some(charge) if additionalCharge => serviceCharge + charge
+      case Some(charge) => charge
       case None => serviceCharge
     }
     total + finalServiceCharge
   }
-  val randomOrder = createRandomOrder(list, 10)
-  println(s"Random Order: $randomOrder")
+
+  val randomOrder = createRandomOrder(menu, 10)
   val serviceCharge = calculateServiceCharge(randomOrder)
   val customCharge = 5.00
+
   println(s"Service Charge: $serviceCharge")
   println(s"Final Charge with default service charge: ${calculateFinalCharge(randomOrder)}")
   println(s"Final Charge with custom service charge instead: ${calculateFinalCharge(randomOrder, Some(customCharge))}")
   println(s"Final Charge with custom service charge in addition: ${calculateFinalCharge(randomOrder, Some(customCharge), additionalCharge = true)}")
 
-
 }
+

@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/CafePOS.UnitTestingAfternoonTask.iml" filepath="$PROJECT_DIR$/.idea/modules/CafePOS.UnitTestingAfternoonTask.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/CafePOS.UnitTestingAfternoonTask.UnitTestingAfternoonTask-build.iml" filepath="$PROJECT_DIR$/.idea/modules/CafePOS.UnitTestingAfternoonTask.UnitTestingAfternoonTask-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Scala.CafePOS.UnitTestingAfternoonTask.iml" filepath="$PROJECT_DIR$/.idea/modules/Scala.CafePOS.UnitTestingAfternoonTask.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Scala.CafePOS.UnitTestingAfternoonTask.UnitTestingAfternoonTask-build.iml" filepath="$PROJECT_DIR$/.idea/modules/Scala.CafePOS.UnitTestingAfternoonTask.UnitTestingAfternoonTask-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/UnitTestingAfternoonTask.iml" filepath="$PROJECT_DIR$/.idea/modules/UnitTestingAfternoonTask.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/UnitTestingAfternoonTask.UnitTestingAfternoonTask-build.iml" filepath="$PROJECT_DIR$/.idea/modules/UnitTestingAfternoonTask.UnitTestingAfternoonTask-build.iml" />
     </modules>

@@ -58,8 +58,6 @@ class MainSpec extends AnyWordSpec with Matchers {
       val totalBill = calculateTotal(emptyOrder)
       totalBill shouldBe 0.0
     }
-
-
   }
 
   "calculateServiceCharge" should {
@@ -103,7 +101,6 @@ class MainSpec extends AnyWordSpec with Matchers {
       val expectedServiceCharge = math.min(total * 0.25, 40.0)
       calculateServiceCharge(order) shouldEqual expectedServiceCharge
     }
-
   }
 
   "calculateFinalCharge" should {
@@ -120,59 +117,56 @@ class MainSpec extends AnyWordSpec with Matchers {
 
   "checkLoyaltyCardEligibility" should {
     "return true for a customer eligible for a drinks loyalty card" in {
-      val customer = Customer("Arei Mohammed", 25, List.fill(5)(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), None, None, isEmployee = false)
+      val customer = Customer("Arei Mohammed", 25, List.fill(5)(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), None, None)
       checkLoyaltyCardEligibility(customer, "drinks") shouldBe true
     }
-  }
 
-  "return false for a customer not eligible for a drinks loyalty card due to age" in {
-    val customer = Customer("Bilal Amiry", 16, List.fill(5)(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), None, None, isEmployee = false)
-    checkLoyaltyCardEligibility(customer, "drinks") shouldBe false
+    "return false for a customer not eligible for a drinks loyalty card due to age" in {
+      val customer = Customer("Bilal Amiry", 16, List.fill(5)(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), None, None)
+      checkLoyaltyCardEligibility(customer, "drinks") shouldBe false
+    }
 
-  }
+    "return false for a customer not eligible for a drinks loyalty card due to insufficient purchases" in {
+      val customer = Customer("Arei Mohammed", 25, List.fill(2)(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), None, None)
+      checkLoyaltyCardEligibility(customer, "drinks") shouldBe false
+    }
 
-  "return false for a customer not eligible for a drinks loyalty card due to insufficient purchases" in {
-    val customer = Customer("Arei Mohammed", 25, List.fill(2)(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), None, None, isEmployee = false)
-    checkLoyaltyCardEligibility(customer, "drinks") shouldBe false
+    "return false for a customer not eligible for a discount loyalty card due to having a discount loyalty card" in {
+      val customer = Customer("Jane Doe", 25, List.fill(5)(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), None, Some(DiscountLoyaltyCard()))
+      checkLoyaltyCardEligibility(customer, "discount") shouldBe false
+    }
 
-  }
+    "return true for a customer eligible for a discount loyalty card" in {
+      val customer = Customer("John Smith", 30, List.fill(5)(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, None)
+      checkLoyaltyCardEligibility(customer, "discount") shouldBe true
+    }
 
-  "return false for a customer not eligible for a drinks loyalty card due to having a discount loyalty card" in {
-    val customer = Customer("Jane Doe", 25, List.fill(5)(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), None, Some(DiscountLoyaltyCard()), isEmployee = false)
-    checkLoyaltyCardEligibility(customer, "discount") shouldBe false
-  }
+    "return false for a customer not eligible for a discount loyalty card due to insufficient total spend" in {
+      val customer = Customer("John Smith", 30, List.fill(5)(CafeMenu("sandwich", 10.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard()))
+      checkLoyaltyCardEligibility(customer, "discount") shouldBe false
+    }
 
-
-  "return true for a customer eligible for a discount loyalty card" in {
-    val customer = Customer("John Smith", 30, List.fill(5)(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, None, isEmployee = false)
-    checkLoyaltyCardEligibility(customer, "discount") shouldBe true
-  }
-
-  "return false for a customer not eligible for a discount loyalty card due to insufficient total spend" in {
-    val customer = Customer("John Smith", 30, List.fill(5)(CafeMenu("sandwich", 10.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard()), isEmployee = false)
-    checkLoyaltyCardEligibility(customer, "discount") shouldBe false
-  }
-
-  "return false for a customer not eligible for a discount loyalty card due to having a drinks loyalty card" in {
-    val customer = Customer("John Smith", 30, List.fill(3)(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), Some(DrinksLoyaltyCard()), None, isEmployee = false)
-    checkLoyaltyCardEligibility(customer, "discount") shouldBe false
+    "return false for a customer not eligible for a discount loyalty card due to having a drinks loyalty card" in {
+      val customer = Customer("John Smith", 30, List.fill(3)(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), Some(DrinksLoyaltyCard()), None)
+      checkLoyaltyCardEligibility(customer, "discount") shouldBe false
+    }
   }
 
   "updateDrinksLoyaltyCard" should {
     "add a stamp to a customer's drinks loyalty card" in {
-      val customer = Customer("Arei Mohammed", 30, List(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), Some(DrinksLoyaltyCard(2)), None, isEmployee = false)
+      val customer = Customer("Arei Mohammed", 30, List(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), Some(DrinksLoyaltyCard(2)), None)
       val updatedCustomer = updateDrinksLoyaltyCard(customer)
       updatedCustomer.drinksLoyaltyCard.get.stamps shouldBe 3
     }
 
     "resets the stamps to 0 after the 10th stamp" in {
-      val customer = Customer("Arei Mohammed", 30, List(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), Some(DrinksLoyaltyCard(10)), None, isEmployee = false)
+      val customer = Customer("Arei Mohammed", 30, List(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), Some(DrinksLoyaltyCard(10)), None)
       val updatedCustomer = updateDrinksLoyaltyCard(customer)
       updatedCustomer.drinksLoyaltyCard.get.stamps shouldBe 0
     }
 
     "do nothing if the customer does not have a drinks loyalty card" in {
-      val customer = Customer("John Doe", 30, List(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), None, None, isEmployee = false)
+      val customer = Customer("John Doe", 30, List(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), None, None)
       val updatedCustomer = updateDrinksLoyaltyCard(customer)
       updatedCustomer.drinksLoyaltyCard shouldBe None
     }
@@ -180,26 +174,25 @@ class MainSpec extends AnyWordSpec with Matchers {
 
   "applyStar" should {
     "add a star to the customer's discount loyalty card if the bill is more than £20" in {
-      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(7)), isEmployee = false)
+      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(7)))
       val updatedCustomer = updateDiscountLoyaltyCard(customer, 21.0)
       updatedCustomer.discountLoyaltyCard.get.stars shouldBe 8
     }
 
     "not add a star to a customer's discount loyalty card if the bill is £20 or less" in {
-      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 20.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(7)), isEmployee = false)
+      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 20.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(7)))
       val updatedCustomer = updateDiscountLoyaltyCard(customer, 20.0)
       updatedCustomer.discountLoyaltyCard.get.stars shouldBe 7
     }
 
     "not add more stars if the customer already has 8 stars" in {
-      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 20.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(8)), isEmployee = false)
+      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 20.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(8)))
       val updatedCustomer = updateDiscountLoyaltyCard(customer, 20.0)
       updatedCustomer.discountLoyaltyCard.get.stars shouldBe 8
-
     }
 
     "do nothing if the customer does not have discount loyalty card" in {
-      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 20.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(7)), isEmployee = false)
+      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 20.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(7)))
       val updatedCustomer = updateDiscountLoyaltyCard(customer, 20.0)
       updatedCustomer.discountLoyaltyCard.get.stars shouldBe 7
     }
@@ -207,47 +200,45 @@ class MainSpec extends AnyWordSpec with Matchers {
 
   "calculateDiscount" should {
     "apply the correct discount based on the number of stars" in {
-      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(4)), isEmployee = false)
+      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(4)))
       val orderTotal = 100.0
       val expectedDiscount = 0.08 * orderTotal
       applyDiscount(customer, orderTotal) shouldBe orderTotal - expectedDiscount
-
     }
 
     "apply the maximum discount of 16% if the customer has 8 stars" in {
-      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(8)), isEmployee = false)
+      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(8)))
       val orderTotal = 100.0
       val expectedDiscount = 0.16 * orderTotal
       applyDiscount(customer, orderTotal) shouldBe orderTotal - expectedDiscount
     }
 
-    "apply no discount if the customer does not have  discount loyalty card" in {
-      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, None, isEmployee = false)
+    "apply no discount if the customer does not have a discount loyalty card" in {
+      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, None)
       val orderTotal = 100.0
       applyDiscount(customer, orderTotal) shouldBe orderTotal
     }
   }
 
   "applyStaffDiscount" should {
-    "apply an additional 10% discount if the customer has worked for 6 months or more" in {
+    "apply an additional 10% discount if the staff member has worked for 6 months or more" in {
       val totalBill = 33.0
-      val customer = Customer("Arei Smith", 25, List(), None, None, isEmployee = true, monthsWorked = Some(8))
-      val discountedBill = applyStaffDiscount(customer, totalBill)
+      val staff = Staff("Arei Smith", 25, List(), None, None, monthsWorked = 8)
+      val discountedBill = applyStaffDiscount(staff, totalBill)
       discountedBill shouldBe 29.7
     }
 
-
-    "not apply the discount if the customer has worked for less than 6 months" in {
+    "not apply the discount if the staff member has worked for less than 6 months" in {
       val totalBill = 33.0
-      val customer = Customer("John Doe", 30, List(), None, None, isEmployee = true, monthsWorked = Some(5))
-      val discountedBill = applyStaffDiscount(customer, totalBill)
+      val staff = Staff("John Doe", 30, List(), None, None, monthsWorked = 5)
+      val discountedBill = applyStaffDiscount(staff, totalBill)
       discountedBill shouldBe 33.0 // No discount applied
     }
 
-    "not apply the discount if the customer has not worked at the company" in {
+    "not apply the discount if the person is not a staff member" in {
       val totalBill = 33.0
-      val customer = Customer("Jane Doe", 30, List(), None, None, isEmployee = false, monthsWorked = None)
-      val discountedBill = applyStaffDiscount(customer, totalBill)
+      val staff = Staff("Jane Doe", 30, List(), None, None, monthsWorked = 0)
+      val discountedBill = applyStaffDiscount(staff, totalBill)
       discountedBill shouldBe 33.0 // No discount applied
     }
   }

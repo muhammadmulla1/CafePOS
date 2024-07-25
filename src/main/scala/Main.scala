@@ -9,20 +9,28 @@ object Main {
   import LoyaltyCardType._
   import Currency._
 
+
+
+
+
   case class Customer(name: String,
                       age: Int,
                       purchaseHistory: List[CafeMenu],
                       drinksLoyaltyCard: Option[DrinksLoyaltyCard],
                       discountLoyaltyCard: Option[DiscountLoyaltyCard],
-                      monthsWorked: Option[Int] = None,
-                      isEmployee: Boolean
-
                      )
 
+  case class Staff(name: String,
+                   age:Int,
+                   purchaseHistory: List[CafeMenu],
+                   drinksLoyaltyCard: Option[DrinksLoyaltyCard],
+                   discountLoyaltyCard: Option[DiscountLoyaltyCard],
+                   monthsWorked: Int
+                  )
+
+
   case class DrinksLoyaltyCard(stamps: Int = 0)
-
   case class DiscountLoyaltyCard(stars: Int = 0)
-
   case class CafeMenu(
                        name: String,
                        price: Double,
@@ -168,14 +176,12 @@ object Main {
     }
   }
 
-  def eligibleForDiscount(customer: Customer): Boolean = {
-    customer.monthsWorked match {
-      case Some(months) if months >= 6 => true
-      case _ => false
-    }
+  def eligibleForDiscount(staff: Staff): Boolean = {
+    staff.monthsWorked >= 6
   }
-  def applyStaffDiscount(customer: Customer, totalBill: Double): Double = {
-    if (eligibleForDiscount(customer)) {
+
+  def applyStaffDiscount(staff: Staff, totalBill: Double): Double = {
+    if (eligibleForDiscount(staff)) {
       totalBill * 0.90
     } else {
       totalBill

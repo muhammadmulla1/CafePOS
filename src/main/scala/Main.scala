@@ -1,5 +1,3 @@
-import sun.util.calendar.BaseCalendar.Date
-
 import scala.util.Random
 
 object Main {
@@ -8,41 +6,8 @@ object Main {
   import Temperature._
   import LoyaltyCardType._
   import Currency._
+  import Models._
 
-
-
-
-
-  case class Customer(name: String,
-                      age: Int,
-                      purchaseHistory: List[CafeMenu],
-                      drinksLoyaltyCard: Option[DrinksLoyaltyCard],
-                      discountLoyaltyCard: Option[DiscountLoyaltyCard],
-                     )
-
-  case class Staff(name: String,
-                   age:Int,
-                   purchaseHistory: List[CafeMenu],
-                   drinksLoyaltyCard: Option[DrinksLoyaltyCard],
-                   discountLoyaltyCard: Option[DiscountLoyaltyCard],
-                   monthsWorked: Int
-                  )
-
-
-  case class DrinksLoyaltyCard(stamps: Int = 0)
-  case class DiscountLoyaltyCard(stars: Int = 0)
-  case class CafeMenu(
-                       name: String,
-                       price: Double,
-                       category: Category.Category,
-                       temperature: Temperature.Temperature,
-                       premium: Boolean
-                     )
-
-
-
-
-  // Sample menu items
   val menu: List[CafeMenu] = List(
     CafeMenu("cake", 1.50, Category.Food, Temperature.Cold, premium = true),
     CafeMenu("espresso", 2.00, Category.Drink, Temperature.Hot, premium = true),

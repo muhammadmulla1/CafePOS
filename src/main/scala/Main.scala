@@ -104,13 +104,18 @@ object Main {
 
   def updateDrinksLoyaltyCard(customer: Customer): Customer = {
     customer.drinksLoyaltyCard match {
-      case Some(card) if card.stamps < 10 =>
-        val newStamps = card.stamps + 1
-        val updatedCard = card.copy(stamps = newStamps)
+      case Some(card) if card.stamps < 9 =>
+        val newStamps = card.stamps +1
+        val updatedCard = card.copy(stamps = card.stamps)
         customer.copy(drinksLoyaltyCard = Some(updatedCard))
-      case _ => customer // Either no card or already full
+      case Some(card) if card.stamps == 9 =>
+        val updatedCard = card.copy(stamps = 0)
+        customer.copy(drinksLoyaltyCard = Some(updatedCard))
+      case Some(card) => customer
+      case None => customer
     }
   }
+
 
   def updateDiscountLoyaltyCard(customer: Customer, orderTotal: Double): Customer = {
     if (orderTotal > 20) {

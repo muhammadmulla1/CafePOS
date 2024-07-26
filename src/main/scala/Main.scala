@@ -2,10 +2,6 @@ import scala.util.Random
 
 object Main {
 
-  import Category._
-  import Temperature._
-  import LoyaltyCardType._
-  import Currency._
   import Models._
 
 
@@ -145,6 +141,7 @@ object Main {
       case None => orderTotal // No discount card
     }
   }
+  
   // apply staff discount to total bill
   def eligibleForDiscount(staff: Staff): Either[String,Boolean]={
     staff match {

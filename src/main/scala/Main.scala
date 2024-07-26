@@ -131,7 +131,7 @@ object Main {
       customer // Order doesn't qualify for a star
     }
   }
-
+// def
   def applyDiscount(customer: Customer, orderTotal: Double): Double = {
     customer.discountLoyaltyCard match {
       case Some(card) =>
@@ -141,7 +141,7 @@ object Main {
       case None => orderTotal // No discount card
     }
   }
-  
+
   // apply staff discount to total bill
   def eligibleForDiscount(staff: Staff): Either[String,Boolean]={
     staff match {

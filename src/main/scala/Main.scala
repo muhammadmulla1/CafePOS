@@ -148,7 +148,7 @@ object Main {
   // apply staff discount to total bill
   def eligibleForDiscount(staff: Staff): Either[String,Boolean]={
     staff match {
-      case Staff  (_,age,_,_,_,monthsWorked) if monthsWorked >= 6 && age >=18 => Right(true)
+      case Staff  (_,age,_,_,_,monthsWorked) if monthsWorked >= 6 && age >= 18 => Right(true)
       case Staff (_,age,_,_,_,monthsWorked) if monthsWorked >age => Left("Illegal: Months worked is higher than the age")
       case _ => Right(false)
     }

@@ -3,6 +3,8 @@ import org.scalatest.matchers.should.Matchers
 import Models._
 import Main._
 
+import java.time.{Clock, LocalDate, LocalTime, ZoneId}
+
 class MainSpec extends AnyWordSpec with Matchers {
 
   "CafeMenu" should {
@@ -199,66 +201,79 @@ class MainSpec extends AnyWordSpec with Matchers {
     }
   }
 
-  "calculateDiscount" should {
+  "applyDiscount" should {
     "apply the correct discount based on the number of stars" in {
-      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(4)))
-      val orderTotal = 100.0
-      val expectedDiscount = 0.08 * orderTotal
-      applyDiscount(customer, orderTotal) shouldBe orderTotal - expectedDiscount
+      val customer = Customer("John Doe", 30, List(
+        CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false),
+        CafeMenu("latte", 3.0, Category.Drink, Temperature.Hot, premium = false)
+      ), None, Some(DiscountLoyaltyCard(4)))
+
+      val orderTotal = -10
+      val expectedDiscount = 0.08 * 30.0 // 8% discount on food items only
+      val expectedTotal = 30.0 - expectedDiscount + 3.0
+
+      Main.applyDiscount(customer, orderTotal) shouldBe expectedTotal
     }
 
     "apply the maximum discount of 16% if the customer has 8 stars" in {
-      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(8)))
+      val customer = Customer("John Doe", 30, List(
+        CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false),
+        CafeMenu("latte", 3.0, Category.Drink, Temperature.Hot, premium = false)
+      ), None, Some(DiscountLoyaltyCard(8)))
+
       val orderTotal = 100.0
-      val expectedDiscount = 0.16 * orderTotal
-      applyDiscount(customer, orderTotal) shouldBe orderTotal - expectedDiscount
+      val expectedDiscount = 0.16 * 30.0 // 16% discount on food items only
+      val expectedTotal = 30.0 - expectedDiscount + 3.0
+
+      Main.applyDiscount(customer, orderTotal) shouldBe expectedTotal
+
     }
 
-    "apply no discount if the customer does not have a discount loyalty card" in {
-      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, None)
-      val orderTotal = 100.0
-      applyDiscount(customer, orderTotal) shouldBe orderTotal
-    }
-  }
-
-  "applyStaffDiscount" should {
-    "apply an additional 10% discount if the staff member has worked for 6 months or more" in {
-      val totalBill = 33.0
-      val staff = Staff("Arei Smith", 25, List(), None, None, monthsWorked = 8)
-      val discountedBill = applyStaffDiscount(staff, totalBill)
-      discountedBill shouldBe Right(29.7)
+      "apply no discount if the customer does not have a discount loyalty card" in {
+        val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, None)
+        val orderTotal = 100.0
+        applyDiscount(customer, orderTotal) shouldBe orderTotal
+      }
     }
 
-    "not apply the discount if the staff member has worked for less than 6 months" in {
-      val totalBill = 33.0
-      val staff = Staff("John Doe", 30, List(), None, None, monthsWorked = 5)
-      val discountedBill = applyStaffDiscount(staff, totalBill)
-      discountedBill shouldBe Right(33.0) // No discount applied
+    "applyStaffDiscount" should {
+      "apply an additional 10% discount if the staff member has worked for 6 months or more" in {
+        val totalBill = 33.0
+        val staff = Staff("Arei Smith", 25, List(), None, None, monthsWorked = 8)
+        val discountedBill = applyStaffDiscount(staff, totalBill)
+        discountedBill shouldBe Right(29.7)
+      }
+
+      "not apply the discount if the staff member has worked for less than 6 months" in {
+        val totalBill = 33.0
+        val staff = Staff("John Doe", 30, List(), None, None, monthsWorked = 5)
+        val discountedBill = applyStaffDiscount(staff, totalBill)
+        discountedBill shouldBe Right(33.0) // No discount applied
+      }
+
+      "not apply the discount if the person is not a staff member" in {
+        val totalBill = 33.0
+        val staff = Staff("Jane Doe", 30, List(), None, None, monthsWorked = 0)
+        val discountedBill = applyStaffDiscount(staff, totalBill)
+        discountedBill shouldBe Right(33.0) // No discount applied
+      }
     }
 
-    "not apply the discount if the person is not a staff member" in {
-      val totalBill = 33.0
-      val staff = Staff("Jane Doe", 30, List(), None, None, monthsWorked = 0)
-      val discountedBill = applyStaffDiscount(staff, totalBill)
-      discountedBill shouldBe Right(33.0) // No discount applied
+    "applyCurrencyConversion" should {
+      "convert the total bill to the specified currency" in {
+        val totalBillGBP = 33.0
+
+        val convertedToEUR = applyCurrencyConversion(totalBillGBP, Currency.EUR)
+        val expectedEUR = totalBillGBP * currencyExchange(Currency.EUR)
+        convertedToEUR shouldBe expectedEUR
+
+        val convertedToUSD = applyCurrencyConversion(totalBillGBP, Currency.USD)
+        val expectedUSD = totalBillGBP * currencyExchange(Currency.USD)
+        convertedToUSD shouldBe expectedUSD
+
+        val convertedToYEN = applyCurrencyConversion(totalBillGBP, Currency.YEN)
+        val expectedYEN = totalBillGBP * currencyExchange(Currency.YEN)
+        convertedToYEN shouldBe expectedYEN
+      }
     }
-  }
-
-  "applyCurrencyConversion" should {
-    "convert the total bill to the specified currency" in {
-      val totalBillGBP = 33.0
-
-      val convertedToEUR = applyCurrencyConversion(totalBillGBP, Currency.EUR)
-      val expectedEUR = totalBillGBP * currencyExchange(Currency.EUR)
-      convertedToEUR shouldBe expectedEUR
-
-      val convertedToUSD = applyCurrencyConversion(totalBillGBP, Currency.USD)
-      val expectedUSD = totalBillGBP * currencyExchange(Currency.USD)
-      convertedToUSD shouldBe expectedUSD
-
-      val convertedToYEN = applyCurrencyConversion(totalBillGBP, Currency.YEN)
-      val expectedYEN = totalBillGBP * currencyExchange(Currency.YEN)
-      convertedToYEN shouldBe expectedYEN
-    }
-  }
 }

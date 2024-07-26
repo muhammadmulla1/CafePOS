@@ -1,4 +1,5 @@
 import scala.util.Random
+import java.time.LocalTime
 
 object Main {
 
@@ -70,6 +71,9 @@ object Main {
     order.map(_.price).sum
   }
 
+
+
+
   // Calculate final charge, includes service charge and optional custom charges
   def calculateFinalCharge(order: List[CafeMenu], customServiceCharge: Option[Double] = None, additionalCharge: Boolean = false): Double = {
     val total = calculateTotal(order)
@@ -81,24 +85,26 @@ object Main {
     }
     total + finalServiceCharge
   }
-  // check if cusotmer is eligabel for loyalty card
+
   def checkLoyaltyCardEligibility(customer: Customer, loyaltyCard: String): Boolean = {
     val totalPurchaseHistory = customer.purchaseHistory.map(_.price).sum
     loyaltyCard.toLowerCase match {
       case "drinks" =>
         customer.age >= 18 &&
-        customer.purchaseHistory.count(_.category == Category.Drink) >= 5 &&
-        customer.drinksLoyaltyCard.isEmpty
+          customer.purchaseHistory.count(_.category == Category.Drink) >= 5 &&
+          customer.drinksLoyaltyCard.isEmpty
 
       case "discount" =>
         customer.age >= 18 &&
-        customer.purchaseHistory.size >= 5 &&
-        totalPurchaseHistory >= 150 &&
-        customer.discountLoyaltyCard.isEmpty
+          customer.purchaseHistory.size >= 5 &&
+          totalPurchaseHistory >= 150 &&
+          customer.discountLoyaltyCard.isEmpty
 
       case _ => false
     }
   }
+
+
 
   // update customers drinks loyalty card
   def updateDrinksLoyaltyCard(customer: Customer): Customer = {
@@ -131,16 +137,40 @@ object Main {
       customer // Order doesn't qualify for a star
     }
   }
-// def
+
+
+
+  def isHappyHour:Boolean = {
+    val now = LocalTime.now()
+    val start = LocalTime.of(18,0)
+    val end   = LocalTime.of(19,0)
+    now.isAfter(start) && now.isBefore(end)
+  }
+
+  // Apply discount based on discount loyalty card stars
   def applyDiscount(customer: Customer, orderTotal: Double): Double = {
-    customer.discountLoyaltyCard match {
-      case Some(card) =>
-        val discountPercentage = card.stars * 0.02
-        val discount = orderTotal * discountPercentage
-        orderTotal - discount
-      case None => orderTotal // No discount card
+    val happyHour = isHappyHour
+    val foodTotal = customer.purchaseHistory.filter(_.category == Category.Food).map(_.price).sum
+    val drinksTotal = customer.purchaseHistory.filter(_.category == Category.Drink).map(_.price).sum
+
+    if (happyHour) {
+      // During happy hour, drinks are half price, no loyalty discount on drinks
+      val happyHourDrinksTotal = drinksTotal / 2
+      foodTotal + happyHourDrinksTotal
+    } else {
+      // Apply loyalty discount to food only
+      customer.discountLoyaltyCard match {
+        case Some(card) =>
+          val discountPercentage = card.stars * 0.02
+          val discountedFoodTotal = foodTotal * (1 - discountPercentage)
+          discountedFoodTotal + drinksTotal
+        case None => orderTotal
+      }
     }
   }
+
+
+
 
   // apply staff discount to total bill
   def eligibleForDiscount(staff: Staff): Either[String,Boolean]={

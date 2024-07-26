@@ -208,11 +208,11 @@ class MainSpec extends AnyWordSpec with Matchers {
         CafeMenu("latte", 3.0, Category.Drink, Temperature.Hot, premium = false)
       ), None, Some(DiscountLoyaltyCard(4)))
 
-      val orderTotal = -10
+
       val expectedDiscount = 0.08 * 30.0 // 8% discount on food items only
       val expectedTotal = 30.0 - expectedDiscount + 3.0
 
-      Main.applyDiscount(customer, orderTotal) shouldBe expectedTotal
+      Main.applyDiscount(customer) shouldBe expectedTotal
     }
 
     "apply the maximum discount of 16% if the customer has 8 stars" in {
@@ -221,18 +221,21 @@ class MainSpec extends AnyWordSpec with Matchers {
         CafeMenu("latte", 3.0, Category.Drink, Temperature.Hot, premium = false)
       ), None, Some(DiscountLoyaltyCard(8)))
 
-      val orderTotal = 100.0
       val expectedDiscount = 0.16 * 30.0 // 16% discount on food items only
       val expectedTotal = 30.0 - expectedDiscount + 3.0
 
-      Main.applyDiscount(customer, orderTotal) shouldBe expectedTotal
+      Main.applyDiscount(customer) shouldBe expectedTotal
 
     }
 
       "apply no discount if the customer does not have a discount loyalty card" in {
-        val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, None)
-        val orderTotal = 100.0
-        applyDiscount(customer, orderTotal) shouldBe orderTotal
+        val customer = Customer("John Doe", 30, List(
+          CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false),
+          CafeMenu("latte", 3.0, Category.Drink, Temperature.Hot, premium = false)
+        ), None, None)
+        val expectedTotal = 30.0 + 3.0
+
+        applyDiscount(customer)  shouldBe expectedTotal
       }
     }
 

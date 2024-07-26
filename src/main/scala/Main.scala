@@ -148,7 +148,7 @@ object Main {
   }
 
   // Apply discount based on discount loyalty card stars
-  def applyDiscount(customer: Customer, orderTotal: Double): Double = {
+  def applyDiscount(customer: Customer): Double = {
     val happyHour = isHappyHour
     val foodTotal = customer.purchaseHistory.filter(_.category == Category.Food).map(_.price).sum
     val drinksTotal = customer.purchaseHistory.filter(_.category == Category.Drink).map(_.price).sum
@@ -164,7 +164,7 @@ object Main {
           val discountPercentage = card.stars * 0.02
           val discountedFoodTotal = foodTotal * (1 - discountPercentage)
           discountedFoodTotal + drinksTotal
-        case None => orderTotal
+        case None => foodTotal + drinksTotal
       }
     }
   }

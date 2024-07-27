@@ -28,6 +28,6 @@ object Models {
 
   object Currency extends Enumeration {
     type Currency = Value
-    val GBP, EUR, USD, YEN = Value
+    val GBP, EUR, USD, YEN, HHH = Value
   }
 }

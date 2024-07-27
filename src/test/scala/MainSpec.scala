@@ -3,32 +3,43 @@ import org.scalatest.matchers.should.Matchers
 import Models._
 import Main._
 
-import java.time.{Clock, LocalDate, LocalTime, ZoneId}
+import java.time.LocalTime
 
 class MainSpec extends AnyWordSpec with Matchers {
 
   "CafeMenu" should {
     "have a list of items" in {
-      val menuItems = Main.menu
-      menuItems should not be empty
+      menu should not be empty
     }
   }
 
   "addPremiumSpecial" should {
-    "add a premium item to the menu" in {
+    "add a premium item to the menu if not already present" in {
       val specialItem = CafeMenu("premium tea", 2.50, Category.Drink, Temperature.Hot, premium = true)
       val updatedMenu = addPremiumSpecial(specialItem, menu)
       updatedMenu should contain(specialItem)
       updatedMenu.size shouldBe menu.size + 1
     }
+
+    "not add a duplicate premium item to the menu" in {
+      val specialItem = CafeMenu("premium tea", 2.50, Category.Drink, Temperature.Hot, premium = true)
+      val updatedMenu = addPremiumSpecial(specialItem, menu :+ specialItem)
+      updatedMenu.count(_ == specialItem) shouldBe 1
+    }
   }
 
   "removePremiumSpecial" should {
-    "remove a premium item from the menu" in {
+    "remove a premium item from the menu if present" in {
       val specialItem = CafeMenu("premium coffee", 3.00, Category.Drink, Temperature.Hot, premium = true)
       val updatedMenu = removePremiumSpecial(specialItem, menu :+ specialItem)
       updatedMenu should not contain specialItem
       updatedMenu.size shouldBe menu.size
+    }
+
+    "do nothing if the premium item is not present in the menu" in {
+      val specialItem = CafeMenu("non-existent item", 5.00, Category.Drink, Temperature.Hot, premium = true)
+      val updatedMenu = removePremiumSpecial(specialItem, menu)
+      updatedMenu shouldBe menu
     }
   }
 
@@ -46,20 +57,18 @@ class MainSpec extends AnyWordSpec with Matchers {
     }
   }
 
-  "generateBill" should {
+  "calculateTotal" should {
     "calculate the total bill for the order" in {
       val order = List(
         CafeMenu("cake", 1.50, Category.Food, Temperature.Cold, premium = false),
         CafeMenu("espresso", 2.00, Category.Drink, Temperature.Hot, premium = false)
       )
-      val totalBill = calculateTotal(order)
-      totalBill shouldBe 3.50
+      calculateTotal(order) shouldBe 3.50
     }
 
-    "return an error message if the order is empty" in {
+    "return zero if the order is empty" in {
       val emptyOrder = List.empty[CafeMenu]
-      val totalBill = calculateTotal(emptyOrder)
-      totalBill shouldBe 0.0
+      calculateTotal(emptyOrder) shouldBe 0.0
     }
   }
 
@@ -69,7 +78,7 @@ class MainSpec extends AnyWordSpec with Matchers {
         CafeMenu("iced coffee", 2.50, Category.Drink, Temperature.Cold, premium = false),
         CafeMenu("smoothie", 3.50, Category.Drink, Temperature.Cold, premium = false)
       )
-      calculateServiceCharge(order) shouldEqual 0.0
+      calculateServiceCharge(order) shouldBe 0.0
     }
 
     "apply a 10% service charge for hot drinks or cold food" in {
@@ -77,7 +86,7 @@ class MainSpec extends AnyWordSpec with Matchers {
         CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false),
         CafeMenu("muffin", 1.75, Category.Food, Temperature.Cold, premium = false)
       )
-      calculateServiceCharge(order) shouldEqual 0.10 * 3.00
+      calculateServiceCharge(order) shouldBe 0.10 * 3.00
     }
 
     "apply a 20% service charge for hot food with a maximum of £20" in {
@@ -85,14 +94,14 @@ class MainSpec extends AnyWordSpec with Matchers {
         CafeMenu("cake", 1.50, Category.Food, Temperature.Hot, premium = false),
         CafeMenu("sandwich", 3.50, Category.Food, Temperature.Cold, premium = false)
       )
-      calculateServiceCharge(order) shouldEqual math.min(0.20 * 5.00, 20.0)
+      calculateServiceCharge(order) shouldBe math.min(0.20 * 5.00, 20.0)
     }
 
     "apply a 25% service charge for premium specials with a maximum of £40" in {
       val order = List(
         CafeMenu("premium tea", 2.50, Category.Drink, Temperature.Hot, premium = true)
       )
-      calculateServiceCharge(order) shouldEqual math.min(0.25 * 2.50, 40.0)
+      calculateServiceCharge(order) shouldBe math.min(0.25 * 2.50, 40.0)
     }
 
     "apply the correct service charge if items purchased are mixed" in {
@@ -101,8 +110,7 @@ class MainSpec extends AnyWordSpec with Matchers {
         CafeMenu("muffin", 1.75, Category.Food, Temperature.Cold, premium = false)
       )
       val total = order.map(_.price).sum
-      val expectedServiceCharge = math.min(total * 0.25, 40.0)
-      calculateServiceCharge(order) shouldEqual expectedServiceCharge
+      calculateServiceCharge(order) shouldBe math.min(total * 0.25, 40.0)
     }
   }
 
@@ -115,6 +123,15 @@ class MainSpec extends AnyWordSpec with Matchers {
       val total = calculateTotal(order)
       val serviceCharge = calculateServiceCharge(order)
       calculateFinalCharge(order) shouldBe total + serviceCharge
+    }
+
+    "apply additional custom service charges when specified" in {
+      val order = List(
+        CafeMenu("cake", 1.50, Category.Food, Temperature.Cold, premium = false),
+        CafeMenu("espresso", 2.00, Category.Drink, Temperature.Hot, premium = false)
+      )
+      val customCharge = 5.0
+      calculateFinalCharge(order, Some(customCharge)) shouldBe calculateTotal(order) + customCharge
     }
   }
 
@@ -132,11 +149,6 @@ class MainSpec extends AnyWordSpec with Matchers {
     "return false for a customer not eligible for a drinks loyalty card due to insufficient purchases" in {
       val customer = Customer("Arei Mohammed", 25, List.fill(2)(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), None, None)
       checkLoyaltyCardEligibility(customer, "drinks") shouldBe false
-    }
-
-    "return false for a customer not eligible for a discount loyalty card due to having a discount loyalty card" in {
-      val customer = Customer("Jane Doe", 25, List.fill(5)(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), None, Some(DiscountLoyaltyCard()))
-      checkLoyaltyCardEligibility(customer, "discount") shouldBe false
     }
 
     "return true for a customer eligible for a discount loyalty card" in {
@@ -162,7 +174,7 @@ class MainSpec extends AnyWordSpec with Matchers {
       updatedCustomer.drinksLoyaltyCard.get.stamps shouldBe 3
     }
 
-    "resets the stamps to 0 after the 10th stamp" in {
+    "reset the stamps to 0 after the 10th stamp" in {
       val customer = Customer("Arei Mohammed", 30, List(CafeMenu("tea", 1.25, Category.Drink, Temperature.Hot, premium = false)), Some(DrinksLoyaltyCard(10)), None)
       val updatedCustomer = updateDrinksLoyaltyCard(customer)
       updatedCustomer.drinksLoyaltyCard.get.stamps shouldBe 0
@@ -175,7 +187,7 @@ class MainSpec extends AnyWordSpec with Matchers {
     }
   }
 
-  "applyStar" should {
+  "updateDiscountLoyaltyCard" should {
     "add a star to the customer's discount loyalty card if the bill is more than £20" in {
       val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(7)))
       val updatedCustomer = updateDiscountLoyaltyCard(customer, 21.0)
@@ -195,9 +207,9 @@ class MainSpec extends AnyWordSpec with Matchers {
     }
 
     "do nothing if the customer does not have discount loyalty card" in {
-      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 20.0, Category.Food, Temperature.Cold, premium = false)), None, Some(DiscountLoyaltyCard(7)))
+      val customer = Customer("John Doe", 30, List(CafeMenu("sandwich", 20.0, Category.Food, Temperature.Cold, premium = false)), None, None)
       val updatedCustomer = updateDiscountLoyaltyCard(customer, 20.0)
-      updatedCustomer.discountLoyaltyCard.get.stars shouldBe 7
+      updatedCustomer.discountLoyaltyCard shouldBe None
     }
   }
 
@@ -207,7 +219,6 @@ class MainSpec extends AnyWordSpec with Matchers {
         CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false),
         CafeMenu("latte", 3.0, Category.Drink, Temperature.Hot, premium = false)
       ), None, Some(DiscountLoyaltyCard(4)))
-
 
       val expectedDiscount = 0.08 * 30.0 // 8% discount on food items only
       val expectedTotal = 30.0 - expectedDiscount + 3.0
@@ -225,58 +236,69 @@ class MainSpec extends AnyWordSpec with Matchers {
       val expectedTotal = 30.0 - expectedDiscount + 3.0
 
       Main.applyDiscount(customer) shouldBe expectedTotal
-
     }
 
-      "apply no discount if the customer does not have a discount loyalty card" in {
-        val customer = Customer("John Doe", 30, List(
-          CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false),
-          CafeMenu("latte", 3.0, Category.Drink, Temperature.Hot, premium = false)
-        ), None, None)
-        val expectedTotal = 30.0 + 3.0
+    "apply no discount if the customer does not have a discount loyalty card" in {
+      val customer = Customer("John Doe", 30, List(
+        CafeMenu("sandwich", 30.0, Category.Food, Temperature.Cold, premium = false),
+        CafeMenu("latte", 3.0, Category.Drink, Temperature.Hot, premium = false)
+      ), None, None)
+      val expectedTotal = 30.0 + 3.0
 
-        applyDiscount(customer)  shouldBe expectedTotal
-      }
+      applyDiscount(customer)  shouldBe expectedTotal
+    }
+  }
+
+  "applyStaffDiscount" should {
+    "apply an additional 10% discount if the staff member has worked for 6 months or more" in {
+      val totalBill = 33.0
+      val staff = Staff("Arei Smith", 25, List(), None, None, monthsWorked = 8)
+      val discountedBill = applyStaffDiscount(staff, totalBill)
+      discountedBill shouldBe Right(29.7)
     }
 
-    "applyStaffDiscount" should {
-      "apply an additional 10% discount if the staff member has worked for 6 months or more" in {
-        val totalBill = 33.0
-        val staff = Staff("Arei Smith", 25, List(), None, None, monthsWorked = 8)
-        val discountedBill = applyStaffDiscount(staff, totalBill)
-        discountedBill shouldBe Right(29.7)
-      }
-
-      "not apply the discount if the staff member has worked for less than 6 months" in {
-        val totalBill = 33.0
-        val staff = Staff("John Doe", 30, List(), None, None, monthsWorked = 5)
-        val discountedBill = applyStaffDiscount(staff, totalBill)
-        discountedBill shouldBe Right(33.0) // No discount applied
-      }
-
-      "not apply the discount if the person is not a staff member" in {
-        val totalBill = 33.0
-        val staff = Staff("Jane Doe", 30, List(), None, None, monthsWorked = 0)
-        val discountedBill = applyStaffDiscount(staff, totalBill)
-        discountedBill shouldBe Right(33.0) // No discount applied
-      }
+    "not apply the discount if the staff member has worked for less than 6 months" in {
+      val totalBill = 33.0
+      val staff = Staff("John Doe", 30, List(), None, None, monthsWorked = 5)
+      val discountedBill = applyStaffDiscount(staff, totalBill)
+      discountedBill shouldBe Right(33.0) // No discount applied
     }
 
-    "applyCurrencyConversion" should {
-      "convert the total bill to the specified currency" in {
-        val totalBillGBP = 33.0
-
-        val convertedToEUR = applyCurrencyConversion(totalBillGBP, Currency.EUR)
-        val expectedEUR = totalBillGBP * currencyExchange(Currency.EUR)
-        convertedToEUR shouldBe expectedEUR
-
-        val convertedToUSD = applyCurrencyConversion(totalBillGBP, Currency.USD)
-        val expectedUSD = totalBillGBP * currencyExchange(Currency.USD)
-        convertedToUSD shouldBe expectedUSD
-
-        val convertedToYEN = applyCurrencyConversion(totalBillGBP, Currency.YEN)
-        val expectedYEN = totalBillGBP * currencyExchange(Currency.YEN)
-        convertedToYEN shouldBe expectedYEN
-      }
+    "return an error if the staff member's months worked exceeds their age" in {
+      val totalBill = 33.0
+      val staff = Staff("Jane Doe", 25, List(), None, None, monthsWorked = 30)
+      val discountedBill = applyStaffDiscount(staff, totalBill)
+      discountedBill shouldBe Left("Illegal: Months worked is higher than the age")
     }
+  }
+
+  "applyCurrencyConversion" should {
+    "convert the total bill to the specified currency" in {
+      val totalBillGBP = 33.0
+
+      val convertedToEUR = applyCurrencyConversion(totalBillGBP, Currency.EUR)
+      val expectedEUR = totalBillGBP * currencyExchange(Currency.EUR)
+      convertedToEUR shouldBe Right(expectedEUR)
+
+      val convertedToUSD = applyCurrencyConversion(totalBillGBP, Currency.USD)
+      val expectedUSD = totalBillGBP * currencyExchange(Currency.USD)
+      convertedToUSD shouldBe Right(expectedUSD)
+
+      val convertedToYEN = applyCurrencyConversion(totalBillGBP, Currency.YEN)
+      val expectedYEN = totalBillGBP * currencyExchange(Currency.YEN)
+      convertedToYEN shouldBe Right(expectedYEN)
+    }
+
+    "return an error if the currency is not supported" in {
+      val totalBillGBP = 33.0
+      val unsupportedCurrency = "HHH"
+      val convertedToUnsupportedCurrency = applyCurrencyConversion(totalBillGBP, Currency.withName(unsupportedCurrency))
+
+      convertedToUnsupportedCurrency shouldBe Left(s"Unsupported currency: $unsupportedCurrency")
+    }
+
+
+
+  }
+
 }

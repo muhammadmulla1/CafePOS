@@ -5,7 +5,6 @@ object Main {
 
   import Models._
 
-  // Sample menu items in the cafe
   val menu: List[CafeMenu] = List(
     CafeMenu("cake", 1.50, Category.Food, Temperature.Cold, premium = true),
     CafeMenu("espresso", 2.00, Category.Drink, Temperature.Hot, premium = true),
@@ -19,7 +18,7 @@ object Main {
     CafeMenu("smoothie", 3.50, Category.Drink, Temperature.Cold, premium = false)
   )
 
-  // Currency exchange rates relative to GBP
+
   val currencyExchange: Map[Currency.Value, Double] = Map(
     Currency.GBP -> 1.0,
     Currency.EUR -> 1.19,
@@ -37,23 +36,23 @@ object Main {
 
   // Add a premium item to the menu if not already present
   def addPremiumSpecial(specialItem: CafeMenu, menu: List[CafeMenu]): List[CafeMenu] = {
-    if (!menu.exists(_.name == specialItem.name)) menu :+ specialItem // Add item if it doesn't exist
-    else menu // Return unchanged menu if item already exists
+    if (!menu.exists(_.name == specialItem.name)) menu :+ specialItem
+    else menu
   }
 
   // Remove a premium item from the menu if present
   def removePremiumSpecial(specialItem: CafeMenu, menu: List[CafeMenu]): List[CafeMenu] = {
-    if (menu.exists(_.name == specialItem.name)) menu.filterNot(_.name == specialItem.name) // Remove item if it exists
-    else menu // Return unchanged menu if item does not exist
+    if (menu.exists(_.name == specialItem.name)) menu.filterNot(_.name == specialItem.name)
+    else menu
   }
 
   // Create a random order of a specified number of items
   def createRandomOrder(menu: List[CafeMenu], numberOfItems: Int): List[CafeMenu] = {
-    Random.shuffle(menu).take(numberOfItems.min(menu.size)) // Shuffle and take the specified number of items
+    Random.shuffle(menu).take(numberOfItems.min(menu.size))
   }
 
   // Calculate the total bill of an order
-  def calculateTotal(order: List[CafeMenu]): Double = order.map(_.price).sum // Sum the prices of all items
+  def calculateTotal(order: List[CafeMenu]): Double = order.map(_.price).sum
 
   // Calculate the service charge based on the order details
   def calculateServiceCharge(order: List[CafeMenu]): Double = {
@@ -65,47 +64,47 @@ object Main {
     val hasHotFood = order.exists(item => item.temperature == Temperature.Hot && item.category == Category.Food)
     val hasPremiumSpecial = order.exists(_.premium)
 
-    val hotFoodCharge = if (hasHotFood) math.min(total * 0.20, 20.0) else 0.0 // 20% charge for hot food, capped at £20
-    val premiumSpecialCharge = if (hasPremiumSpecial) math.min(total * 0.25, 40.0) else 0.0 // 25% charge for premium specials, capped at £40
-    val otherCharge = if (hasHotDrinks || hasColdFood) total * 0.10 else 0.0 // 10% charge for hot drinks or cold food
+    val hotFoodCharge = if (hasHotFood) math.min(total * 0.20, 20.0) else 0.0
+    val premiumSpecialCharge = if (hasPremiumSpecial) math.min(total * 0.25, 40.0) else 0.0
+    val otherCharge = if (hasHotDrinks || hasColdFood) total * 0.10 else 0.0
 
-    math.max(hotFoodCharge, math.max(premiumSpecialCharge, otherCharge)) // Max charge applied
+    math.max(hotFoodCharge, math.max(premiumSpecialCharge, otherCharge)) // Mmx charge applied
   }
 
-  // Calculate the final charge including service and custom charges
+  // final charge including service and custom charges
   def calculateFinalCharge(order: List[CafeMenu], customServiceCharge: Option[Double] = None, additionalCharge: Boolean = false): Double = {
-    val total = calculateTotal(order) // Calculate total bill
-    val serviceCharge = calculateServiceCharge(order) // Calculate service charge
+    val total = calculateTotal(order)
+    val serviceCharge = calculateServiceCharge(order)
     val finalServiceCharge = customServiceCharge match {
-      case Some(charge) if additionalCharge => serviceCharge + charge // Add custom charge if specified
+      case Some(charge) if additionalCharge => serviceCharge + charge // add custom charge if wanted
       case Some(charge) => charge // Use custom charge only
       case None => serviceCharge // Use calculated service charge
     }
-    total + finalServiceCharge // Return the final bill
+    total + finalServiceCharge
   }
 
-  // Check eligibility for loyalty cards
+  //  eligibility fheck foor loyalty cards
   def checkLoyaltyCardEligibility(customer: Customer, loyaltyCard: String): Boolean = {
     val totalPurchaseHistory = customer.purchaseHistory.map(_.price).sum
-    val hasRequiredAge = customer.age >= 18 // Check if the customer is of required age
+    val hasRequiredAge = customer.age >= 18
 
     loyaltyCard.toLowerCase match {
       case "drinks" =>
         hasRequiredAge &&
           customer.purchaseHistory.count(_.category == Category.Drink) >= 5 &&
-          customer.drinksLoyaltyCard.isEmpty // Check if eligible for drinks loyalty card
+          customer.drinksLoyaltyCard.isEmpty //  eligible for drinks loyalty card
 
       case "discount" =>
         hasRequiredAge &&
           customer.purchaseHistory.size >= 5 &&
           totalPurchaseHistory >= 150 &&
-          customer.discountLoyaltyCard.isEmpty // Check if eligible for discount loyalty card
+          customer.discountLoyaltyCard.isEmpty // eligible for discount loyalty card
 
-      case _ => false // Return false for unknown loyalty card types
+      case _ => false
     }
   }
 
-  // Update customer's drinks loyalty card
+  // Update drinks loyalty card
   def updateDrinksLoyaltyCard(customer: Customer): Customer = {
     customer.drinksLoyaltyCard match {
       case Some(card) if card.stamps < 9 =>
@@ -118,33 +117,37 @@ object Main {
     }
   }
 
-  // Update customer's discount loyalty card (stars)
+  //Update customer discount loyalty card (stars)
   def updateDiscountLoyaltyCard(customer: Customer, orderTotal: Double): Customer = {
     if (orderTotal > 20) {
       customer.discountLoyaltyCard match {
         case Some(card) if card.stars < 8 =>
-          val updatedCard = card.copy(stars = card.stars + 1) // Add a star if not maxed out
+          val updatedCard = card.copy(stars = card.stars + 1) // add a star if not at cap
           customer.copy(discountLoyaltyCard = Some(updatedCard))
-        case None => customer // Return unchanged customer if no card
+        case None => customer
       }
     } else {
-      customer // Order doesn't qualify for a star
+      customer // doesn't qualify for a star
     }
   }
 
-  // Check if it's happy hour
+
   def isHappyHour(currentTime: LocalTime = LocalTime.now(), start: LocalTime = LocalTime.of(18, 0), end: LocalTime = LocalTime.of(19, 0)): Boolean = {
-    currentTime.isAfter(start) && currentTime.isBefore(end) // Check if current time is within happy hour
+    currentTime.isAfter(start) && currentTime.isBefore(end)
   }
 
   // Apply discount based on discount loyalty card stars and happy hour
   def applyDiscount(customer: Customer, currentTime: LocalTime = LocalTime.now()): Double = {
-    val happyHour = isHappyHour(currentTime) // Check if it's happy hour
-    val (foodItems, drinkItems) = customer.purchaseHistory.partition(_.category == Category.Food)
+    val happyHour = isHappyHour(currentTime)
+    val (foodItems, drinkItems) = customer.purchaseHistory.partition(_.category == Category.Food) // split purchase history into fooditems and drinkitems(returns a tuple)
+    val nonPremiumFoodItems = foodItems.filterNot(_.premium) // Exclude premium food items
 
     val discountedFoodTotal = customer.discountLoyaltyCard match {
-      case Some(card) => foodItems.map(_.price).sum * (1 - card.stars * 0.02) // Apply discount to food
-      case None => foodItems.map(_.price).sum // No discount if no card
+      case Some(card) if card.stars == 8 =>
+        nonPremiumFoodItems.map(_.price).sum * 0.84 //Apply 16 discount to nonpremium food
+      case Some(card) =>
+        nonPremiumFoodItems.map(_.price).sum * (1 - card.stars * 0.02) // spply discount based on stars to non-premium food
+      case None => nonPremiumFoodItems.map(_.price).sum //no discount if no card
     }
 
     val finalDrinkTotal = if (happyHour) drinkItems.map(_.price).sum / 2 else drinkItems.map(_.price).sum // Apply half price for drinks during happy hour
@@ -152,19 +155,19 @@ object Main {
     discountedFoodTotal + finalDrinkTotal // Return total after applying discounts
   }
 
-  // Check if staff is eligible for a discount
+  // check if staff is eligible for a discount
   def eligibleForDiscount(staff: Staff): Either[String, Boolean] = {
     if (staff.monthsWorked > staff.age) Left("Illegal: Months worked is higher than the age")
-    else if (staff.monthsWorked >= 6 && staff.age >= 18) Right(true) // Eligible if criteria met
-    else Right(false) // Not eligible if criteria not met
+    else if (staff.monthsWorked >= 6 && staff.age >= 18) Right(true) //  if criteria met the eligable
+    else Right(false)
   }
 
   // Apply staff discount to total bill
   def applyStaffDiscount(staff: Staff, totalBill: Double): Either[String, Double] = {
     eligibleForDiscount(staff) match {
-      case Right(true) => Right(totalBill * 0.9) // Apply 10% discount if eligible
-      case Right(false) => Right(totalBill) // No discount if not eligible
-      case Left(error) => Left(error) // Return error message if any issues
+      case Right(true) => Right(totalBill * 0.9) // 10% discount if eligible
+      case Right(false) => Right(totalBill) //No discount
+      case Left(error) => Left(error)
     }
   }
 }

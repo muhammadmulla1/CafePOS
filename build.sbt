@@ -1,8 +1,17 @@
+import scala.collection.Seq
+
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "2.13.14"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "CafePOS"
+    name := "UnitTestingAfternoonTask"
   )
+libraryDependencies ++= Seq(
+  "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+  "org.scalactic" %% "scalactic" % "3.2.19",
+)
+
+
+libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.2"

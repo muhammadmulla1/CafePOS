@@ -2,8 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CafePOS.iml" filepath="$PROJECT_DIR$/.idea/modules/CafePOS.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CafePOS.CafePOS-build.iml" filepath="$PROJECT_DIR$/.idea/modules/CafePOS.CafePOS-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CafePOS.UnitTestingAfternoonTask.iml" filepath="$PROJECT_DIR$/.idea/modules/CafePOS.UnitTestingAfternoonTask.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CafePOS.UnitTestingAfternoonTask.UnitTestingAfternoonTask-build.iml" filepath="$PROJECT_DIR$/.idea/modules/CafePOS.UnitTestingAfternoonTask.UnitTestingAfternoonTask-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Scala.CafePOS.UnitTestingAfternoonTask.iml" filepath="$PROJECT_DIR$/.idea/modules/Scala.CafePOS.UnitTestingAfternoonTask.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Scala.CafePOS.UnitTestingAfternoonTask.UnitTestingAfternoonTask-build.iml" filepath="$PROJECT_DIR$/.idea/modules/Scala.CafePOS.UnitTestingAfternoonTask.UnitTestingAfternoonTask-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/UnitTestingAfternoonTask.iml" filepath="$PROJECT_DIR$/.idea/modules/UnitTestingAfternoonTask.iml" />
     </modules>
   </component>
 </project>
